@@ -17,8 +17,6 @@ public:
                 text(*cpu_model_)  | color(Color::Cyan1),
                 text(*cpu_temp_)  | color(Color::Cyan1),
                 text(*cpu_usage_) | color(Color::Cyan1)
-            ),
-            vbox(
             )
         }) | border | borderStyled(BorderStyle::EMPTY);
     }

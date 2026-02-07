@@ -21,7 +21,7 @@ int main() {
 
     std::thread updater([&] () {
         while (true) {
-            std::this_thread::sleep_for(std::chrono::seconds(1));
+            std::this_thread::sleep_for(std::chrono::milliseconds(750));
             cpu_temp = get_cpu_temp();
             cpu_usage = get_cpu_usage(cpu_usage_log);
             screen.PostEvent(Event::Custom);

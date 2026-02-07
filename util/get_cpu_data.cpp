@@ -56,11 +56,6 @@ string get_cpu_temp() {
 
 string get_cpu_usage(std::deque<CpuUsage> &cpu_usage_log) {
     string usage = "Usage: ";
-    CpuUsage previousUsage {};
-
-    if (!cpu_usage_log.empty()) {
-        previousUsage = cpu_usage_log.back();
-    }
 
     FILE* pipe = popen("head -n 1 /proc/stat | awk '{print $2, $3, $4, $5, $6, $7, $8}'", "r");
 
@@ -74,6 +69,13 @@ string get_cpu_usage(std::deque<CpuUsage> &cpu_usage_log) {
 
     CpuUsage currentUsage = parse_usage_stats(line);
 
+    if (cpu_usage_log.size() < 2) {
+        cpu_usage_log.push_back(currentUsage);
+        return "Usage: ...";
+    }
+
+    CpuUsage previousUsage {};
+    previousUsage = cpu_usage_log.back();
     usage += calculate_usage(previousUsage, currentUsage);
     usage += "%";
 
@@ -84,11 +86,9 @@ string get_cpu_usage(std::deque<CpuUsage> &cpu_usage_log) {
 
 CpuUsage parse_usage_stats(string line) {
     stringstream ss(line);
-
-    // Temp string to store splitted string
     string temp;
 
-    // Delimeter (seperator)
+    // Separator
     char del = ' ';
     CpuUsage usage;
 
