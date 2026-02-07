@@ -1,4 +1,4 @@
 # PSYWATCH
 Psywatch is a psychedelic themed terminal based hardware monitor for Linux.
 
-Run by running *./run.sh* in the root directory.
+Run by running *./psywatch.sh* in the root directory.
