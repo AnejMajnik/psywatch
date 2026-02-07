@@ -9,21 +9,22 @@ using namespace ftxui;
 
 class CpuData : public ComponentBase {
 public:
-    CpuData(std::string* cpu_model, std::string* cpu_temp) : cpu_model_(cpu_model), cpu_temp_(cpu_temp) {}
+    CpuData(std::string* cpu_model, std::string* cpu_temp, std::string* cpu_usage) : cpu_model_(cpu_model), cpu_temp_(cpu_temp), cpu_usage_(cpu_usage) {}
 
     Element Render() {
         return hbox({
             vbox(
                 text(*cpu_model_)  | color(Color::Cyan1),
-                text(*cpu_temp_)  | color(Color::Cyan1)
-            ) | border | color(Color::Pink1),
+                text(*cpu_temp_)  | color(Color::Cyan1),
+                text(*cpu_usage_) | color(Color::Cyan1)
+            ),
             vbox(
-                text("Hello from screen 2") | color(Color::HotPink2)
             )
-        }) | border | color(Color::Cyan1) | size(HEIGHT, EQUAL, 100);
+        }) | border | borderStyled(BorderStyle::EMPTY);
     }
 
 private:
     std::string* cpu_model_;
     std::string* cpu_temp_;
+    std::string* cpu_usage_;
 };

@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(ftxui REQUIRED)
 
 # Create executable
-add_executable(main main.cpp util/file_io.cpp)
+add_executable(main main.cpp util/get_cpu_data.cpp)
 
 target_link_libraries(main
     PRIVATE ftxui::screen
