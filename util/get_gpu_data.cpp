@@ -98,3 +98,21 @@ string build_vram_usage() {
 
     return vram_usage;
 }
+
+string get_power_draw() {
+    string power_draw = "Power: ";
+    int usage = 0;
+    FILE *pipe = popen("cat /sys/class/drm/card1/device/hwmon/hwmon1/power1_average", "r");
+
+    char buffer[128];
+    while(fgets(buffer, sizeof(buffer), pipe) != nullptr) {
+        usage = atoi(buffer);
+    }
+    pclose(pipe);
+
+    usage /= 1000000;
+    power_draw += to_string(usage);
+    power_draw += "W";
+
+    return power_draw;
+}

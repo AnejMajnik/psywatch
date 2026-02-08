@@ -24,6 +24,7 @@ int main() {
     std::string gpu_temp = get_gpu_temp();
     std::string gpu_usage = get_gpu_usage();
     std::string vram_usage = build_vram_usage();
+    std::string power_draw = get_power_draw();
 
 
     auto screen = ScreenInteractive::Fullscreen();
@@ -40,13 +41,14 @@ int main() {
             gpu_temp = get_gpu_temp();
             gpu_usage = get_gpu_usage();
             vram_usage = build_vram_usage();
+            power_draw = get_power_draw();
 
             screen.PostEvent(Event::Custom);
         }
     });
 
     auto cpu_data_base = std::make_shared<CpuData>(&cpu_model, &cpu_temp, &cpu_usage);
-    auto gpu_data_base = std::make_shared<GpuData>(&gpu_temp, &gpu_usage, &vram_usage);
+    auto gpu_data_base = std::make_shared<GpuData>(&gpu_temp, &gpu_usage, &vram_usage, &power_draw);
 
     auto container = Container::Vertical({
         cpu_data_base,

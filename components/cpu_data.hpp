@@ -18,7 +18,7 @@ public:
                 text(*cpu_temp_)  | color(Color::Cyan1),
                 text(*cpu_usage_) | color(Color::Cyan1)
             )
-        }) | border | borderStyled(BorderStyle::EMPTY);
+        }) | border | borderStyled(BorderStyle::EMPTY) | color(Color::Cyan1);
     }
 
 private:
