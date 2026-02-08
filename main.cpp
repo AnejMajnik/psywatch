@@ -23,6 +23,7 @@ int main() {
     // GPU
     std::string gpu_temp = get_gpu_temp();
     std::string gpu_usage = get_gpu_usage();
+    std::string vram_usage = build_vram_usage();
 
 
     auto screen = ScreenInteractive::Fullscreen();
@@ -31,17 +32,21 @@ int main() {
         while (true) {
             std::this_thread::sleep_for(std::chrono::milliseconds(750));
 
+            // CPU
             cpu_temp = get_cpu_temp();
             cpu_usage = get_cpu_usage(cpu_usage_log);
+
+            // GPU
             gpu_temp = get_gpu_temp();
             gpu_usage = get_gpu_usage();
+            vram_usage = build_vram_usage();
 
             screen.PostEvent(Event::Custom);
         }
     });
 
     auto cpu_data_base = std::make_shared<CpuData>(&cpu_model, &cpu_temp, &cpu_usage);
-    auto gpu_data_base = std::make_shared<GpuData>(&gpu_temp, &gpu_usage);
+    auto gpu_data_base = std::make_shared<GpuData>(&gpu_temp, &gpu_usage, &vram_usage);
 
     auto container = Container::Vertical({
         cpu_data_base,
