@@ -1,34 +1,30 @@
 #include <cstdio>
-#include <iostream>
 #include <string>
 #include <cstdlib>
 #include "get_cpu_data.hpp"
 #include <bits/stdc++.h>
+#include <fstream>
 
 using namespace std;
 
 string get_cpu_model() {
     string model_name = "CPU: ";
-    bool input = false;
 
-    FILE* catPipe = popen("cat /proc/cpuinfo | grep 'model name' | head -n1", "r");
+    ifstream file("/proc/cpuinfo");
+    string line;
+    string target = "model name";
+    bool found = false;
 
-    if (catPipe == nullptr) {
-        cerr << "Failed to run cat and grep" << endl;
-        return "";
-    }
-
-    char buffer[128];
-    while(fgets(buffer, sizeof(buffer), catPipe) != nullptr) {
-        size_t pos = string(buffer).find(':');
-        if (pos != string::npos) {
+    while(getline(file, line)) {
+        if (line.find(target) != string::npos) {
             // If a ':' is found, extract after that
-            model_name += string(buffer).substr(pos +2); // Skip colon and space
-            input = true;
-        }
+            size_t pos = string(line).find(':');
+            model_name += string(line).substr(pos +2); // Skip colon and space
 
+            return model_name;
+        }
     }
-    pclose(catPipe);
+
     return model_name;
 }
 
