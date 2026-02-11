@@ -29,25 +29,21 @@ string get_cpu_model() {
 }
 
 string get_cpu_temp() {
-    string temp = "Temperature: ";
-    int sum = 0;
-    int count = 0;
+    string temperature = "Temperature: ";
+    int temp = 0;
 
-    FILE* catPipe = popen("cat /sys/class/hwmon/hwmon*/temp*_input", "r");
+    ifstream file("/sys/class/hwmon/hwmon2/temp1_input");
+    string line;
 
-    char buffer[128];
-    while(fgets(buffer, sizeof(buffer), catPipe) != nullptr) {
-        sum += atoi(buffer);
-        count++;
-    }
-    pclose(catPipe);
+    getline(file, line);
 
-    int avgTemp = sum/1000/count;
+    temp = stoi(line);
+    temp /= 1000;
 
-    temp += to_string(avgTemp);
-    temp += "˚C";
+    temperature += to_string(temp);
+    temperature += "˚C";
 
-    return temp;
+    return temperature;
 }
 
 string get_cpu_usage(std::deque<CpuUsage> &cpu_usage_log) {

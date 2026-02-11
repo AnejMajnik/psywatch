@@ -39,19 +39,16 @@ string get_gpu_usage() {
     return gpu_usage;
 }
 
-
-
 string get_total_vram() {
     string total_vram = "";
     double vram = 0;
-    FILE *pipe = popen("cat /sys/class/drm/card1/device/mem_info_vram_total", "r");
 
-    char buffer[128];
-    while(fgets(buffer, sizeof(buffer), pipe) != nullptr) {
-        vram = stod(buffer);
-    }
-    pclose(pipe);
+    ifstream file("/sys/class/drm/card1/device/mem_info_vram_total");
+    string line;
 
+    getline(file, line);
+
+    vram = stod(line);
     vram /= 1024*1024*1024;
     double result = trunc(vram * 100)/100; // Only use two decimals
 
@@ -65,14 +62,13 @@ string get_total_vram() {
 string get_used_vram() {
     string used_vram = "";
     double vram = 0;
-    FILE *pipe = popen("cat /sys/class/drm/card1/device/mem_info_vram_used", "r");
 
-    char buffer[128];
-    while(fgets(buffer, sizeof(buffer), pipe) != nullptr) {
-        vram = stod(buffer);
-    }
-    pclose(pipe);
+    ifstream file("/sys/class/drm/card1/device/mem_info_vram_used");
+    string line;
 
+    getline(file, line);
+
+    vram = stod(line);
     vram /= 1024*1024*1024;
     double result = trunc(vram * 100)/100; // Only use two decimals
 
@@ -98,14 +94,13 @@ string build_vram_usage() {
 string get_power_draw() {
     string power_draw = "Power: ";
     int usage = 0;
-    FILE *pipe = popen("cat /sys/class/drm/card1/device/hwmon/hwmon1/power1_average", "r");
 
-    char buffer[128];
-    while(fgets(buffer, sizeof(buffer), pipe) != nullptr) {
-        usage = atoi(buffer);
-    }
-    pclose(pipe);
+    ifstream file("/sys/class/drm/card1/device/hwmon/hwmon1/power1_average");
+    string line;
 
+    getline(file, line);
+
+    usage = stoi(line);
     usage /= 1000000;
     power_draw += to_string(usage);
     power_draw += "W";
