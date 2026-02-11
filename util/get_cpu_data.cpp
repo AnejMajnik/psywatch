@@ -1,6 +1,6 @@
 #include <cstdio>
+#include <sstream>
 #include <string>
-#include <cstdlib>
 #include "get_cpu_data.hpp"
 #include <bits/stdc++.h>
 #include <fstream>
@@ -49,17 +49,15 @@ string get_cpu_temp() {
 string get_cpu_usage(std::deque<CpuUsage> &cpu_usage_log) {
     string usage = "Usage: ";
 
-    FILE* pipe = popen("head -n 1 /proc/stat | awk '{print $2, $3, $4, $5, $6, $7, $8}'", "r");
+    ifstream file("/proc/stat");
+    string line;
 
-    char buffer[128];
-    string line = "";
+    getline(file, line);
 
-    while(fgets(buffer, sizeof(buffer), pipe) != nullptr) {
-        line = buffer;
-    }
-    pclose(pipe);
+    size_t pos = line.find("  ");
+    string data = string(line).substr(pos + 2);
 
-    CpuUsage currentUsage = parse_usage_stats(line);
+    CpuUsage currentUsage = parse_usage_stats(data);
 
     if (cpu_usage_log.size() < 2) {
         cpu_usage_log.push_back(currentUsage);

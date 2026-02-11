@@ -1,6 +1,4 @@
 #include "get_gpu_data.hpp"
-#include <cstdio>
-#include <cstdlib>
 #include <fstream>
 #include <string>
 #include <cmath>
