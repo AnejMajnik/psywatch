@@ -4,11 +4,11 @@
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/screen/string.hpp>
-#include <memory>
 #include <thread>
 #include "components/gpu_data.hpp"
 #include "util/get_cpu_data.hpp"
 #include "util/get_gpu_data.hpp"
+#include <cmath>
 
 int main() {
     using namespace ftxui;
@@ -28,6 +28,7 @@ int main() {
 
 
     auto screen = ScreenInteractive::Fullscreen();
+    float time = 0;
 
     std::thread updater([&] () {
         while (true) {
@@ -43,22 +44,31 @@ int main() {
             vram_usage = build_vram_usage();
             power_draw = get_power_draw();
 
+            time += 0.016f;
+
             screen.PostEvent(Event::Custom);
         }
     });
 
-    auto cpu_data_base = std::make_shared<CpuData>(&cpu_model, &cpu_temp, &cpu_usage);
-    auto gpu_data_base = std::make_shared<GpuData>(&gpu_temp, &gpu_usage, &vram_usage, &power_draw);
+    auto cpu_data_component = CpuData(cpu_model, cpu_temp, cpu_usage);
+    auto gpu_data_component = GpuData(gpu_temp, gpu_usage, vram_usage, power_draw);
 
     auto container = Container::Vertical({
-        cpu_data_base,
-        gpu_data_base
+        cpu_data_component,
+        gpu_data_component
     });
 
     auto renderer = Renderer(container, [&] {
+        auto c = Canvas(200, 200);
+
+        int x = 100 + (int)(80 * cos(time * 2));
+        int y = 50 + (int)(40 * sin(time * 3));
+
+        c.DrawPointCircleFilled(x, y, 10, Color::Cyan);
         return vbox({
-            cpu_data_base->Render(),
-            gpu_data_base->Render()
+            cpu_data_component->Render(),
+            gpu_data_component->Render(),
+            canvas(std::move(c))
         });
     });
 

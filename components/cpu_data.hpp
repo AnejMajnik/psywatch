@@ -7,22 +7,12 @@
 
 using namespace ftxui;
 
-class CpuData : public ComponentBase {
-public:
-    CpuData(std::string* cpu_model, std::string* cpu_temp, std::string* cpu_usage) : cpu_model_(cpu_model), cpu_temp_(cpu_temp), cpu_usage_(cpu_usage) {}
-
-    Element Render() {
-        return hbox({
-            vbox(
-                text(*cpu_model_)  | color(Color::Cyan1),
-                text(*cpu_temp_)  | color(Color::Cyan1),
-                text(*cpu_usage_) | color(Color::Cyan1)
-            )
-        }) | border | borderStyled(BorderStyle::EMPTY) | color(Color::Cyan1);
-    }
-
-private:
-    std::string* cpu_model_;
-    std::string* cpu_temp_;
-    std::string* cpu_usage_;
+inline Component CpuData(const std::string &cpu_model, const std::string &cpu_temp, const std::string &cpu_usage) {
+    return Renderer([&] {
+        return vbox(
+            text(cpu_model) | color(Color::Cyan1),
+            text(cpu_temp) | color(Color::Cyan1),
+            text(cpu_usage) | color(Color::Cyan1)
+        ) | border | borderStyled(BorderStyle::EMPTY) | color(Color::Cyan1);
+    });
 };
