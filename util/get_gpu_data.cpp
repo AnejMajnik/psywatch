@@ -24,12 +24,16 @@ string get_gpu_temp() {
     return gpu_temp;
 }
 
-string get_gpu_usage() {
+string get_gpu_usage(deque<GpuUsage> &gpu_usage_log) {
     string gpu_usage = "GPU usage: ";
 
     ifstream file("/sys/class/drm/card1/device/gpu_busy_percent");
     string line = "";
     getline(file, line);
+
+    GpuUsage usage;
+    usage.usage = stoi(line);
+    gpu_usage_log.push_back(usage);
 
     gpu_usage += line;
     gpu_usage += "%";

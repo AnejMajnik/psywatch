@@ -1,4 +1,6 @@
-struct CpuUsage {
+#pragma once
+
+struct RawCpuUsage {
     unsigned long user;
     unsigned long nice;
     unsigned long system;
@@ -6,4 +8,8 @@ struct CpuUsage {
     unsigned long iowait;
     unsigned long irq;
     unsigned long softirq;
+};
+
+struct CpuUsage {
+    int usage;
 };

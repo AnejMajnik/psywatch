@@ -6,6 +6,9 @@
 #include <ftxui/screen/string.hpp>
 #include <thread>
 #include "components/gpu_data.hpp"
+#include "components/gpu_usage_graph.hpp"
+#include "components/cpu_usage_graph.hpp"
+#include "structs/gpu_struct.hpp"
 #include "util/get_cpu_data.hpp"
 #include "util/get_gpu_data.hpp"
 #include <cmath>
@@ -13,16 +16,21 @@
 int main() {
     using namespace ftxui;
 
+    // For calculations
+    std::deque<RawCpuUsage> raw_cpu_usage_log;
+
+    // Graph
     std::deque<CpuUsage> cpu_usage_log;
+    std::deque<GpuUsage> gpu_usage_log;
 
     // CPU
     std::string cpu_model = get_cpu_model();
     std::string cpu_temp = get_cpu_temp();
-    std::string cpu_usage = get_cpu_usage(cpu_usage_log);
+    std::string cpu_usage = get_cpu_usage(raw_cpu_usage_log, cpu_usage_log);
 
     // GPU
     std::string gpu_temp = get_gpu_temp();
-    std::string gpu_usage = get_gpu_usage();
+    std::string gpu_usage = get_gpu_usage(gpu_usage_log);
     std::string vram_usage = build_vram_usage();
     std::string power_draw = get_power_draw();
 
@@ -36,11 +44,11 @@ int main() {
 
             // CPU
             cpu_temp = get_cpu_temp();
-            cpu_usage = get_cpu_usage(cpu_usage_log);
+            cpu_usage = get_cpu_usage(raw_cpu_usage_log, cpu_usage_log);
 
             // GPU
             gpu_temp = get_gpu_temp();
-            gpu_usage = get_gpu_usage();
+            gpu_usage = get_gpu_usage(gpu_usage_log);
             vram_usage = build_vram_usage();
             power_draw = get_power_draw();
 
@@ -52,10 +60,14 @@ int main() {
 
     auto cpu_data_component = CpuData(cpu_model, cpu_temp, cpu_usage);
     auto gpu_data_component = GpuData(gpu_temp, gpu_usage, vram_usage, power_draw);
+    auto graph_gpu_component = GpuUsageGraph(gpu_usage_log);
+    auto graph_cpu_component = CpuUsageGraph(cpu_usage_log);
 
     auto container = Container::Vertical({
         cpu_data_component,
-        gpu_data_component
+        graph_cpu_component,
+        gpu_data_component,
+        graph_gpu_component,
     });
 
     auto renderer = Renderer(container, [&] {
@@ -67,8 +79,9 @@ int main() {
         c.DrawPointCircleFilled(x, y, 10, Color::Cyan);
         return vbox({
             cpu_data_component->Render(),
+            graph_cpu_component->Render(),
             gpu_data_component->Render(),
-            canvas(std::move(c))
+            graph_gpu_component->Render(),
         });
     });
 

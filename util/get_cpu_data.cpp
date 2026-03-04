@@ -46,7 +46,7 @@ string get_cpu_temp() {
     return temperature;
 }
 
-string get_cpu_usage(std::deque<CpuUsage> &cpu_usage_log) {
+string get_cpu_usage(deque<RawCpuUsage> &raw_cpu_usage_log, deque<CpuUsage> &cpu_usage_log) {
     string usage = "Usage: ";
 
     ifstream file("/proc/stat");
@@ -57,30 +57,37 @@ string get_cpu_usage(std::deque<CpuUsage> &cpu_usage_log) {
     size_t pos = line.find("  ");
     string data = string(line).substr(pos + 2);
 
-    CpuUsage currentUsage = parse_usage_stats(data);
+    RawCpuUsage currentUsage = parse_usage_stats(data);
 
-    if (cpu_usage_log.size() < 2) {
-        cpu_usage_log.push_back(currentUsage);
+    if (raw_cpu_usage_log.size() < 2) {
+        raw_cpu_usage_log.push_back(currentUsage);
         return "Usage: ...";
     }
 
-    CpuUsage previousUsage {};
-    previousUsage = cpu_usage_log.back();
-    usage += calculate_usage(previousUsage, currentUsage);
+    RawCpuUsage previousUsage {};
+    CpuUsage cpu_usage;
+
+    previousUsage = raw_cpu_usage_log.back();
+    
+    int num = stoi(calculate_usage(previousUsage, currentUsage));
+    cpu_usage.usage = num;
+    cpu_usage_log.push_back(cpu_usage);
+
+    usage += to_string(num);
     usage += "%";
 
-    cpu_usage_log.push_back(currentUsage);
+    raw_cpu_usage_log.push_back(currentUsage);
 
     return usage;
 }
 
-CpuUsage parse_usage_stats(string line) {
+RawCpuUsage parse_usage_stats(string line) {
     stringstream ss(line);
     string temp;
 
     // Separator
     char del = ' ';
-    CpuUsage usage;
+    RawCpuUsage usage;
 
     vector<string> values;
 
@@ -124,7 +131,7 @@ CpuUsage parse_usage_stats(string line) {
     return usage;
 }
 
-string calculate_usage(CpuUsage previousUsage, CpuUsage currentUsage) {
+string calculate_usage(RawCpuUsage previousUsage, RawCpuUsage currentUsage) {
     long userDelta = currentUsage.user - previousUsage.user;
     long niceDelta = currentUsage.nice - previousUsage.nice;
     long systemDelta = currentUsage.system - previousUsage.system;
