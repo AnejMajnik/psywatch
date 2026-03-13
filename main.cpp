@@ -12,6 +12,7 @@
 #include "util/get_cpu_data.hpp"
 #include "util/get_gpu_data.hpp"
 #include <cmath>
+#include "util/util.hpp"
 
 int main() {
     using namespace ftxui;
@@ -52,6 +53,9 @@ int main() {
             vram_usage = build_vram_usage();
             power_draw = get_power_draw();
 
+            Util::trim_usage_deque(cpu_usage_log);
+            Util::trim_usage_deque(gpu_usage_log);
+
             time += 0.016f;
 
             screen.PostEvent(Event::Custom);
@@ -71,12 +75,6 @@ int main() {
     });
 
     auto renderer = Renderer(container, [&] {
-        auto c = Canvas(200, 200);
-
-        int x = 100 + (int)(80 * cos(time * 2));
-        int y = 50 + (int)(40 * sin(time * 3));
-
-        c.DrawPointCircleFilled(x, y, 10, Color::Cyan);
         return vbox({
             cpu_data_component->Render(),
             graph_cpu_component->Render(),

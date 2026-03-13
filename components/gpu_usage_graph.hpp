@@ -9,17 +9,16 @@ using namespace ftxui;
 
 inline Component GpuUsageGraph(std::deque<GpuUsage> &usage) {
     return Renderer([&] {
-        auto c = Canvas(200, 50);
+        auto c = Canvas(180, 50);
 
         for (int i=0; i<usage.size(); i++) {
-            int y1 = 0;
-            int y2 = usage[i].usage/2;
-            c.DrawPointLine(i, y1, i, y2, Color::Red1);
+            int y1 = 49;
+            int y2 = 47 - usage[i].usage/2;
+            c.DrawPointLine(i, y1, i, y2, Color::RGB(150, 0, 255));
         }
 
         return vbox(
-            text("GPU Usage"),
             canvas(std::move(c))
-        ) | border | borderStyled(BorderStyle::EMPTY) | color(Color::Cyan1);
+        ) | border | borderStyled(BorderStyle::EMPTY) | color(Color::RGB(150, 0, 255));
     });
 }
