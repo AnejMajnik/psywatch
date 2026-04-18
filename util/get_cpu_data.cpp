@@ -1,148 +1,150 @@
-#include <cstdio>
-#include <sstream>
-#include <string>
 #include "get_cpu_data.hpp"
 #include <bits/stdc++.h>
+#include <cstdio>
 #include <fstream>
+#include <sstream>
+#include <string>
 
 using namespace std;
 
 string get_cpu_model() {
-    string model_name = "CPU: ";
+  string model_name = "CPU: ";
 
-    ifstream file("/proc/cpuinfo");
-    string line;
-    string target = "model name";
-    bool found = false;
+  ifstream file("/proc/cpuinfo");
+  string line;
+  string target = "model name";
+  bool found = false;
 
-    while(getline(file, line)) {
-        if (line.find(target) != string::npos) {
-            // If a ':' is found, extract after that
-            size_t pos = string(line).find(':');
-            model_name += string(line).substr(pos +2); // Skip colon and space
+  while (getline(file, line)) {
+    if (line.find(target) != string::npos) {
+      // If a ':' is found, extract after that
+      size_t pos = string(line).find(':');
+      model_name += string(line).substr(pos + 2); // Skip colon and space
 
-            return model_name;
-        }
+      return model_name;
     }
+  }
 
-    return model_name;
+  return model_name;
 }
 
 string get_cpu_temp() {
-    string temperature = "Temperature: ";
-    int temp = 0;
+  string temperature = "Temperature: ";
+  int temp = 0;
 
-    ifstream file("/sys/class/hwmon/hwmon2/temp1_input");
-    string line;
+  ifstream file("/sys/class/hwmon/hwmon2/temp1_input");
+  string line;
 
-    getline(file, line);
+  getline(file, line);
 
-    temp = stoi(line);
-    temp /= 1000;
+  temp = stoi(line);
+  temp /= 1000;
 
-    temperature += to_string(temp);
-    temperature += "˚C";
+  temperature += to_string(temp);
+  temperature += "˚C";
 
-    return temperature;
+  return temperature;
 }
 
-string get_cpu_usage(deque<RawCpuUsage> &raw_cpu_usage_log, deque<CpuUsage> &cpu_usage_log) {
-    string usage = "Usage: ";
+string get_cpu_usage(deque<RawCpuUsage> &raw_cpu_usage_log,
+                     deque<CpuUsage> &cpu_usage_log) {
+  string usage = "Usage: ";
 
-    ifstream file("/proc/stat");
-    string line;
+  ifstream file("/proc/stat");
+  string line;
 
-    getline(file, line);
+  getline(file, line);
 
-    size_t pos = line.find("  ");
-    string data = string(line).substr(pos + 2);
+  size_t pos = line.find("  ");
+  string data = string(line).substr(pos + 2);
 
-    RawCpuUsage currentUsage = parse_usage_stats(data);
+  RawCpuUsage currentUsage = parse_usage_stats(data);
 
-    if (raw_cpu_usage_log.size() < 2) {
-        raw_cpu_usage_log.push_back(currentUsage);
-        return "Usage: ...";
-    }
-
-    RawCpuUsage previousUsage {};
-    CpuUsage cpu_usage;
-
-    previousUsage = raw_cpu_usage_log.back();
-    
-    int num = stoi(calculate_usage(previousUsage, currentUsage));
-    cpu_usage.usage = num;
-    cpu_usage_log.push_back(cpu_usage);
-
-    usage += to_string(num);
-    usage += "%";
-
+  if (raw_cpu_usage_log.size() < 2) {
     raw_cpu_usage_log.push_back(currentUsage);
+    return "Usage: ...";
+  }
 
-    return usage;
+  RawCpuUsage previousUsage{};
+  CpuUsage cpu_usage;
+
+  previousUsage = raw_cpu_usage_log.back();
+
+  int num = stoi(calculate_usage(previousUsage, currentUsage));
+  cpu_usage.usage = num;
+  cpu_usage_log.push_back(cpu_usage);
+
+  usage += to_string(num);
+  usage += "%";
+
+  raw_cpu_usage_log.push_back(currentUsage);
+
+  return usage;
 }
 
 RawCpuUsage parse_usage_stats(string line) {
-    stringstream ss(line);
-    string temp;
+  stringstream ss(line);
+  string temp;
 
-    // Separator
-    char del = ' ';
-    RawCpuUsage usage;
+  // Separator
+  char del = ' ';
+  RawCpuUsage usage;
 
-    vector<string> values;
+  vector<string> values;
 
-    while (getline(ss, temp, del)) {
-        values.push_back(temp);
+  while (getline(ss, temp, del)) {
+    values.push_back(temp);
+  }
+
+  for (int i = 0; i < values.size() - 1; i++) {
+    switch (i) {
+    case 0: {
+      usage.user = stol(values[i]);
+      break;
     }
-
-    for (int i=0; i<values.size()-1; i++) {
-        switch (i) {
-            case 0: {
-                usage.user = stol(values[i]);
-                break;
-            }
-            case 1: {
-                usage.nice = stol(values[i]);
-                break;
-            }
-            case 2: {
-                usage.system = stol(values[i]);
-                break;
-            }
-            case 3: {
-                usage.idle = stol(values[i]);
-                break;
-            }
-            case 4: {
-                usage.iowait = stol(values[i]);
-                break;
-            }
-            case 5: {
-                usage.irq = stol(values[i]);
-                break;
-            }
-            case 6: {
-                usage.softirq = stol(values[i]);
-                break;
-            }
-        }
+    case 1: {
+      usage.nice = stol(values[i]);
+      break;
     }
+    case 2: {
+      usage.system = stol(values[i]);
+      break;
+    }
+    case 3: {
+      usage.idle = stol(values[i]);
+      break;
+    }
+    case 4: {
+      usage.iowait = stol(values[i]);
+      break;
+    }
+    case 5: {
+      usage.irq = stol(values[i]);
+      break;
+    }
+    case 6: {
+      usage.softirq = stol(values[i]);
+      break;
+    }
+    }
+  }
 
-    return usage;
+  return usage;
 }
 
 string calculate_usage(RawCpuUsage previousUsage, RawCpuUsage currentUsage) {
-    long userDelta = currentUsage.user - previousUsage.user;
-    long niceDelta = currentUsage.nice - previousUsage.nice;
-    long systemDelta = currentUsage.system - previousUsage.system;
-    long idleDelta = currentUsage.idle - previousUsage.idle;
-    long iowaitDelta = currentUsage.iowait - previousUsage.iowait;
-    long irqDelta = currentUsage.irq - previousUsage.irq;
-    long softirqDelta = currentUsage.softirq - previousUsage.softirq;
+  long userDelta = currentUsage.user - previousUsage.user;
+  long niceDelta = currentUsage.nice - previousUsage.nice;
+  long systemDelta = currentUsage.system - previousUsage.system;
+  long idleDelta = currentUsage.idle - previousUsage.idle;
+  long iowaitDelta = currentUsage.iowait - previousUsage.iowait;
+  long irqDelta = currentUsage.irq - previousUsage.irq;
+  long softirqDelta = currentUsage.softirq - previousUsage.softirq;
 
-    long totalDelta = userDelta + niceDelta + systemDelta + idleDelta + iowaitDelta + irqDelta + softirqDelta;
+  long totalDelta = userDelta + niceDelta + systemDelta + idleDelta +
+                    iowaitDelta + irqDelta + softirqDelta;
 
-    long usage = ((totalDelta - idleDelta) * 100) / totalDelta;
+  long usage = ((totalDelta - idleDelta) * 100) / totalDelta;
 
-    return to_string(usage);
+  return to_string(usage);
 }

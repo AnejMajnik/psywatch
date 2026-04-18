@@ -8,7 +8,7 @@
 using namespace std;
 
 string get_gpu_temp() {
-    string gpu_temp = "GPU temp: ";
+    string gpu_temp = "GPU temperature: ";
     int temp = 0;
 
     ifstream file("/sys/class/drm/card1/device/hwmon/hwmon1/temp1_input");

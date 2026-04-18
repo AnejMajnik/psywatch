@@ -9,7 +9,7 @@ using namespace ftxui;
 
 inline Component GpuUsageGraph(std::deque<GpuUsage> &usage) {
     return Renderer([&] {
-        auto c = Canvas(180, 50);
+        auto c = Canvas(400, 50);
 
         for (int i=0; i<usage.size(); i++) {
             int y1 = 49;
